@@ -27,6 +27,7 @@ cpSync(
   join(repo, "scripts", "Start-MapGraphicsBuilder.bat"),
   join(appDir, "Start Map Graphics Builder.bat"),
 );
+cpSync(join(repo, "LICENSE"), join(appDir, "LICENSE.txt"));
 
 writeFileSync(
   join(appDir, "README.txt"),
@@ -42,6 +43,8 @@ writeFileSync(
     "The basemap tiles still need an internet connection.",
     "Drawings are stored in this browser for http://127.0.0.1:17321/",
     "Export GeoJSON / KML / KMZ / CSV to take graphics with you.",
+    "",
+    "Licensed under MIT. See LICENSE.txt.",
     "",
   ].join("\r\n"),
   "utf8",

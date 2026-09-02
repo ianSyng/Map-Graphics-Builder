@@ -47,6 +47,10 @@ The app itself is self-contained. Basemap tiles still need internet. Drawings st
 - **Tailwind CSS 4**
 - **Leaflet** + **react-leaflet** (map + drawing)
 
+## License
+
+[MIT](LICENSE) © 2026 Ian Young
+
 ## Current v0
 
 - Draw: point, line, polygon, circle
