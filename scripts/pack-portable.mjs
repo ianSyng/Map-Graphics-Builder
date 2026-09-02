@@ -44,6 +44,7 @@ writeFileSync(
     "Drawings are stored in this browser for http://127.0.0.1:17321/",
     "Export GeoJSON / KML / KMZ / CSV to take graphics with you.",
     "",
+    "Demo: https://ianSyng.github.io/",
     "Licensed under MIT. See LICENSE.txt.",
     "",
   ].join("\r\n"),

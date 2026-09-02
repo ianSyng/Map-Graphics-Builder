@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { downloadBlob, exportGraphics, type ExportFormat } from "@/lib/io";
+import { APP_BUILD, APP_VERSION } from "@/lib/version";
 import type { Graphic } from "@/types/graphic";
 
 const EXPORTS: { id: ExportFormat; label: string }[] = [
@@ -56,6 +57,12 @@ export function AppHeader({
         <h1 className="text-sm font-semibold tracking-wide text-slate-100">
           Map Graphics Builder
         </h1>
+        <span
+          className="font-mono text-[10px] text-slate-500"
+          title={`Build ${APP_BUILD}`}
+        >
+          v{APP_VERSION}
+        </span>
       </div>
       <span className="hidden text-[11px] text-slate-500 sm:inline">
         Draw · GeoJSON · KML · KMZ · CSV

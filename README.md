@@ -4,6 +4,8 @@ Browser app for drawing, styling, and exporting map graphics.
 
 Draw points, lines, areas, and circles on a dark basemap. Graphics persist in the browser (`localStorage`) and export as GeoJSON.
 
+**Live demo:** [https://ianSyng.github.io/](https://ianSyng.github.io/)
+
 ## Prerequisites
 
 - Node.js 20+ (repo developed against Node 24)
@@ -39,6 +41,7 @@ The app itself is self-contained. Basemap tiles still need internet. Drawings st
 | `npm run build` | Typecheck + production bundle in `dist/` |
 | `npm run preview` | Serve the production build |
 | `npm run portable` | Production build + copyable Windows folder in `portable/` |
+| `npm run pages` | Production build + publish demo to [ianSyng.github.io](https://ianSyng.github.io/) |
 | `npm run lint` | ESLint |
 
 ## Stack
