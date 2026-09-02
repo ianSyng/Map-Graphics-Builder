@@ -1,0 +1,207 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #020617;
+  color: #e2e8f0;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+.leaflet-container.mgb-erase {
+  cursor: crosshair;
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background: #0f172a;
+  font: inherit;
+}
+
+.leaflet-control-attribution {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: #94a3b8 !important;
+}
+
+.leaflet-control-attribution a {
+  color: #7dd3fc !important;
+}
+
+.leaflet-bar a {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-bottom-color: #334155 !important;
+}
+
+.leaflet-bar a:hover {
+  background: #334155 !important;
+}
+
+.mgb-shape-editable {
+  cursor: move;
+}
+
+.leaflet-div-icon.mgb-handle {
+  background: transparent;
+  border: none;
+}
+
+.mgb-handle span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.mgb-handle-vertex span {
+  border: 2px solid #e0f2fe;
+  background: #38bdf8;
+  box-shadow: 0 0 0 1px #0f172a;
+  cursor: grab;
+}
+
+.mgb-handle-vertex.is-active span {
+  background: #fbbf24;
+  border-color: #fff;
+}
+
+.mgb-handle-mid span {
+  width: 7px;
+  height: 7px;
+  margin: 1px;
+  transform: rotate(45deg);
+  border: 1px solid #7dd3fc;
+  background: #0f172a;
+  cursor: copy;
+}
+
+.mgb-handle-radius span {
+  border-radius: 999px;
+  border: 2px solid #fbbf24;
+  background: #0f172a;
+  cursor: nesw-resize;
+}
+
+.mgb-handle-rotate span {
+  border-radius: 999px;
+  border: 2px solid #38bdf8;
+  background: #082f49;
+  cursor: grab;
+}
+
+.leaflet-marker-icon.mil-symbol,
+.leaflet-div-icon.mil-symbol,
+.mil-symbol {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.mil-symbol img,
+.mil-symbol svg,
+.catalog-icon img {
+  display: block;
+  overflow: visible;
+  background: transparent;
+  max-width: none;
+  max-height: none;
+}
+
+.catalog-icon img {
+  height: 100%;
+  width: auto;
+}
+
+.leaflet-marker-icon.cm-line-label,
+.cm-line-label {
+  background: transparent !important;
+  border: none !important;
+  overflow: visible !important;
+}
+
+.cm-line-label-text,
+.cm-line-echelon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+  transform-origin: center center;
+  text-shadow:
+    -1px -1px 0 #020617,
+    1px -1px 0 #020617,
+    -1px 1px 0 #020617,
+    1px 1px 0 #020617,
+    0 0 2px #020617;
+}
+
+.cm-line-label-bare {
+  background: transparent;
+  padding: 0;
+}
+
+.cm-line-label-start {
+  justify-content: flex-start;
+}
+
+.cm-line-label-end {
+  justify-content: flex-end;
+}
+
+.cm-line-echelon {
+  position: relative;
+  background: transparent;
+  font-size: 16px;
+  letter-spacing: 0.16em;
+}
+
+.cm-line-echelon-mask {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 5px;
+  background: #0f172a;
+  pointer-events: none;
+}
+
+.cm-line-echelon-mark {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 2px #0f172a;
+}
+
+.leaflet-marker-icon.cm-line-arrow,
+.cm-line-arrow {
+  background: transparent !important;
+  border: none !important;
+}
+
+.cm-line-arrow-head {
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 14px solid #7dd3fc;
+  transform-origin: 50% 70%;
+}
