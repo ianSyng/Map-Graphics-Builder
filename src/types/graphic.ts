@@ -2,7 +2,13 @@ import type { GraphicSymbol } from "@/domain/sidc";
 
 export type GraphicKind = "point" | "line" | "rectangle" | "polygon" | "circle";
 
-export type DrawTool = "select" | "erase" | GraphicKind | "cm-point" | "cm-line";
+export type DrawTool =
+  | "select"
+  | "erase"
+  | GraphicKind
+  | "cm-point"
+  | "cm-line"
+  | "cm-area";
 
 export type DashStyle = "solid" | "dashed";
 
@@ -40,6 +46,7 @@ export const TOOL_LABELS: Record<DrawTool, string> = {
   circle: "Circle",
   "cm-point": "2525 Point",
   "cm-line": "2525 Line",
+  "cm-area": "2525 Area",
 };
 
 export const DEFAULT_STYLE: Pick<

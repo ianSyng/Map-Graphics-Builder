@@ -5,8 +5,13 @@ import {
   type ControlMeasureDef,
   type ControlMeasureGeometry,
 } from "@/catalogs/controlMeasurePoints";
+import { CONTROL_MEASURE_AREA_GROUPS } from "@/catalogs/controlMeasureAreas";
 import { CONTROL_MEASURE_LINE_GROUPS } from "@/catalogs/controlMeasureLines";
-import { CatalogIcon, LineCatalogIcon } from "@/components/CatalogIcon";
+import {
+  AreaCatalogIcon,
+  CatalogIcon,
+  LineCatalogIcon,
+} from "@/components/CatalogIcon";
 import { cmStrokeColor } from "@/lib/cmLine";
 import {
   IDENTITIES,
@@ -66,7 +71,8 @@ export function CatalogPanel({
   return (
     <aside className="flex w-72 shrink-0 flex-col border-r border-slate-800 bg-slate-950">
       <div className="border-b border-slate-800 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-        Appendix H · {geometry === "line" ? "Lines" : "Points"}
+        Appendix H ·{" "}
+        {geometry === "line" ? "Lines" : geometry === "area" ? "Areas" : "Points"}
       </div>
       <div className="flex flex-col gap-2 border-b border-slate-800 p-2">
         <label className="flex flex-col gap-0.5 text-[10px] uppercase tracking-wide text-slate-500">
@@ -113,13 +119,26 @@ export function CatalogPanel({
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={geometry === "line" ? "Search lines…" : "Search points…"}
+          placeholder={
+            geometry === "line"
+              ? "Search lines…"
+              : geometry === "area"
+                ? "Search areas…"
+                : "Search points…"
+          }
           className="rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-100 outline-none focus:border-sky-500"
         />
         {geometry === "line" && (
           <p className="text-[10px] leading-snug text-slate-500">
             2525 linework is in for Boundary, maneuver, and fires. Other groups
             are labelled stubs until we take them in turn.
+          </p>
+        )}
+        {geometry === "area" && (
+          <p className="text-[10px] leading-snug text-slate-500">
+            Circular: click center, then a point on the radius. Multi-point:
+            click vertices, then Enter or double-click. Rectangular variants
+            are not in yet.
           </p>
         )}
         {standard === "2525E" && (
@@ -132,7 +151,9 @@ export function CatalogPanel({
       <div className="min-h-0 flex-1 overflow-auto p-1">
         {(geometry === "line"
           ? CONTROL_MEASURE_LINE_GROUPS
-          : CONTROL_MEASURE_POINT_GROUPS
+          : geometry === "area"
+            ? CONTROL_MEASURE_AREA_GROUPS
+            : CONTROL_MEASURE_POINT_GROUPS
         ).map((group) => {
           const items = rows.filter((d) => d.group === group);
           if (items.length === 0) return null;
@@ -183,6 +204,12 @@ export function CatalogPanel({
                           abbrev={d.abbrev}
                           color={cmStrokeColor(identity)}
                           draw={d.lineDraw}
+                        />
+                      ) : geometry === "area" ? (
+                        <AreaCatalogIcon
+                          abbrev={d.abbrev}
+                          color={cmStrokeColor(identity)}
+                          draw={d.areaDraw}
                         />
                       ) : (
                         <CatalogIcon sidc={previewSidc} />

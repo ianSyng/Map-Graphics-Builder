@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import { Polygon, Polyline } from "react-leaflet";
-import type { PolygonProps, PolylineProps } from "react-leaflet";
-import { polygonPath, polylinePath, samePath } from "@/lib/latlng";
+import { Circle, Polygon, Polyline } from "react-leaflet";
+import type { CircleProps, PolygonProps, PolylineProps } from "react-leaflet";
+import { isFiniteLatLng, polygonPath, polylinePath, samePath } from "@/lib/latlng";
 import type { LatLng } from "@/types/graphic";
 
 function useStablePath(next: LatLng[] | null): LatLng[] | null {
@@ -22,4 +22,17 @@ export function SafePolygon({ positions, ...props }: PolygonProps) {
   const pts = useStablePath(polygonPath(positions));
   if (!pts) return null;
   return <Polygon positions={pts} {...props} />;
+}
+
+export function SafeCircle({
+  center,
+  radius,
+  ...props
+}: CircleProps) {
+  const c = Array.isArray(center) ? (center as LatLng) : null;
+  if (!c || !isFiniteLatLng(c)) return null;
+  if (typeof radius !== "number" || !Number.isFinite(radius) || radius <= 0) {
+    return null;
+  }
+  return <Circle center={c} radius={radius} {...props} />;
 }

@@ -44,6 +44,7 @@ export default function App() {
   const [status, setStatus] = useState<StatusCode>("0");
   const [cmEntity, setCmEntity] = useState<string | null>("130300");
   const [cmLineEntity, setCmLineEntity] = useState<string | null>("140300");
+  const [cmAreaEntity, setCmAreaEntity] = useState<string | null>("240803");
 
   const cancelDraft = useCallback(() => {
     store.setDraft([]);
@@ -76,7 +77,31 @@ export default function App() {
       store.addGraphic("line", draft);
       return;
     }
-    if (tool === "polygon" && draft.length >= 3) {
+    if (
+      (tool === "polygon" || tool === "cm-area") &&
+      draft.length >= 3
+    ) {
+      if (tool === "cm-area") {
+        if (!cmAreaEntity) return;
+        const def = findControlMeasure(cmAreaEntity);
+        if (!def || def.areaDraw === "circle") return;
+        const symbol = makeSymbol({
+          standard,
+          entity: def.entity,
+          identity,
+          status,
+        });
+        store.addGraphic("polygon", draft, {
+          symbol,
+          name: def.abbrev || def.name,
+          color: cmStrokeColor(identity),
+          dash: status === "1" ? "dashed" : "solid",
+          weight: 3,
+          fillOpacity: 0,
+          stayOnTool: true,
+        });
+        return;
+      }
       store.addGraphic("polygon", draft);
     }
     if (tool === "rectangle" && draft[0] && (draft[1] || hoverRef.current)) {
@@ -87,7 +112,7 @@ export default function App() {
         headingDeg: rect.headingDeg,
       });
     }
-  }, [store, headingDeg, cmLineEntity, standard, identity, status]);
+  }, [store, headingDeg, cmLineEntity, cmAreaEntity, standard, identity, status]);
 
   const onTool = useCallback(
     (t: DrawTool) => {
@@ -123,6 +148,36 @@ export default function App() {
       }
       if (tool === "point") {
         store.addGraphic("point", [ll]);
+        return;
+      }
+      if (tool === "cm-area") {
+        if (!cmAreaEntity) return;
+        const def = findControlMeasure(cmAreaEntity);
+        if (!def) return;
+        if (def.areaDraw === "circle") {
+          if (draft.length === 0) {
+            store.setDraft([ll]);
+            return;
+          }
+          const symbol = makeSymbol({
+            standard,
+            entity: def.entity,
+            identity,
+            status,
+          });
+          store.addGraphic("circle", [draft[0]], {
+            symbol,
+            name: def.abbrev || def.name,
+            color: cmStrokeColor(identity),
+            dash: status === "1" ? "dashed" : "solid",
+            weight: 3,
+            fillOpacity: 0,
+            radiusM: Math.max(1, distanceM(draft[0], ll)),
+            stayOnTool: true,
+          });
+          return;
+        }
+        store.setDraft((prev) => [...prev, ll]);
         return;
       }
       if (tool === "cm-line" && isLinearTarget(cmLineEntity ?? undefined)) {
@@ -177,7 +232,7 @@ export default function App() {
       }
       store.setDraft((prev) => [...prev, ll]);
     },
-    [store, headingDeg, cmEntity, cmLineEntity, standard, identity, status],
+    [store, headingDeg, cmEntity, cmLineEntity, cmAreaEntity, standard, identity, status],
   );
 
   useEffect(() => {
@@ -249,7 +304,8 @@ export default function App() {
   const canFinish =
     ((store.tool === "line" || store.tool === "cm-line") &&
       store.draft.length >= 2) ||
-    (store.tool === "polygon" && store.draft.length >= 3) ||
+    ((store.tool === "polygon" || store.tool === "cm-area") &&
+      store.draft.length >= 3) ||
     (store.tool === "rectangle" && store.draft.length >= 2);
 
   return (
@@ -290,7 +346,9 @@ export default function App() {
           canFinish={canFinish}
           headingDeg={headingDeg}
         />
-        {(store.tool === "cm-point" || store.tool === "cm-line") && (
+        {(store.tool === "cm-point" ||
+          store.tool === "cm-line" ||
+          store.tool === "cm-area") && (
           <ErrorBoundary
             fallback={
               <aside className="w-72 shrink-0 border-r border-slate-800 bg-slate-950 p-3 text-xs text-red-300">
@@ -303,18 +361,41 @@ export default function App() {
               standard={standard}
               identity={identity}
               status={status}
-              geometry={store.tool === "cm-line" ? "line" : "point"}
+              geometry={
+                store.tool === "cm-line"
+                  ? "line"
+                  : store.tool === "cm-area"
+                    ? "area"
+                    : "point"
+              }
               selectedEntity={
-                store.tool === "cm-line" ? cmLineEntity : cmEntity
+                store.tool === "cm-line"
+                  ? cmLineEntity
+                  : store.tool === "cm-area"
+                    ? cmAreaEntity
+                    : cmEntity
               }
               onStandard={setStandard}
               onIdentity={setIdentity}
               onStatus={setStatus}
-              onSelect={(def) =>
-                def.geometry === "line"
-                  ? setCmLineEntity(def.entity)
-                  : setCmEntity(def.entity)
-              }
+              onSelect={(def) => {
+                if (def.geometry === "line") {
+                  setCmLineEntity(def.entity);
+                  return;
+                }
+                if (def.geometry === "area") {
+                  const prev = cmAreaEntity
+                    ? findControlMeasure(cmAreaEntity)
+                    : undefined;
+                  if (prev && prev.areaDraw !== def.areaDraw) {
+                    store.setDraft([]);
+                    hoverRef.current = null;
+                  }
+                  setCmAreaEntity(def.entity);
+                  return;
+                }
+                setCmEntity(def.entity);
+              }}
             />
           </ErrorBoundary>
         )}
@@ -335,6 +416,11 @@ export default function App() {
                     identity,
                     status,
                   }
+                : null
+            }
+            cmAreaDraw={
+              store.tool === "cm-area"
+                ? (findControlMeasure(cmAreaEntity ?? "")?.areaDraw ?? null)
                 : null
             }
             fitRequest={fitRequest}

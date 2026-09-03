@@ -16,15 +16,18 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { EditHandles } from "@/components/EditHandles";
+import { CmAreaLayer } from "@/components/CmAreaLayer";
 import { CmLineLayer } from "@/components/CmLineLayer";
 import { CmLineMarker } from "@/components/CmLineMarker";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { SafePolygon, SafePolyline } from "@/components/SafePath";
+import { SafeCircle, SafePolygon, SafePolyline } from "@/components/SafePath";
 import { SymbolMarker } from "@/components/SymbolMarker";
 import { idsIntersectingBox } from "@/lib/eraseHit";
 import { bearingDeg } from "@/lib/geodesy";
 import { cleanLatLngs, isFiniteLatLng, polylinePath } from "@/lib/latlng";
+import { isCmAreaGraphic } from "@/lib/cmArea";
 import { CM_HALO, CM_INK, isCmLinePointGraphic } from "@/lib/cmLine";
+import { distanceM } from "@/lib/geo";
 import { makeLinearTargetIcon } from "@/lib/linearTargetIcon";
 import { makeSymbol } from "@/domain/sidc";
 import {
@@ -98,6 +101,7 @@ function MapClickHandler({
         tool === "line" ||
         tool === "cm-line" ||
         tool === "polygon" ||
+        tool === "cm-area" ||
         tool === "rectangle"
       ) {
         L.DomEvent.stop(e.originalEvent);
@@ -381,6 +385,18 @@ function GraphicShape({
     );
   }
 
+  if (isCmAreaGraphic(graphic)) {
+    return (
+      <CmAreaLayer
+        graphic={graphic}
+        selected={selected}
+        editing={editing}
+        onSelect={onSelect}
+        onBeginMove={onBeginMove}
+      />
+    );
+  }
+
   if (graphic.kind === "circle" && isFiniteLatLng(graphic.positions[0])) {
     const [lat, lng] = graphic.positions[0];
     return (
@@ -436,6 +452,7 @@ function DraftShape({
   hover,
   headingDeg,
   linearTargetPreview,
+  cmAreaDraw,
 }: {
   tool: DrawTool;
   draft: LatLng[];
@@ -447,6 +464,7 @@ function DraftShape({
     identity: string;
     status: string;
   } | null;
+  cmAreaDraw: "circle" | "polygon" | null;
 }) {
   if (
     linearTargetPreview &&
@@ -535,12 +553,75 @@ function DraftShape({
       return <Marker position={draft[0]} icon={markerIcon} />;
     }
   }
-  if (tool === "polygon" && draft.length >= 2) {
-    const pts = polylinePath(draft);
-    if (pts) return <SafePolyline positions={pts} pathOptions={path} />;
+  if (tool === "cm-area" && cmAreaDraw === "polygon") {
+    const pts = polylinePath(hover ? [...draft, hover] : draft);
+    if (pts) {
+      const join = {
+        lineJoin: "round" as const,
+        lineCap: "round" as const,
+        fillOpacity: 0.06,
+        dashArray: "4 4",
+      };
+      return (
+        <>
+          <SafePolygon
+            positions={pts}
+            pathOptions={{ color: CM_HALO, weight: 7, fillColor: CM_HALO, ...join, fillOpacity: 0 }}
+            interactive={false}
+          />
+          <SafePolygon
+            positions={pts}
+            pathOptions={{ color: CM_INK, weight: 3, fillColor: CM_INK, ...join }}
+            interactive={false}
+          />
+        </>
+      );
+    }
+    if (isFiniteLatLng(draft[0])) {
+      return <Marker position={draft[0]} icon={markerIcon} />;
+    }
   }
-  if (tool === "circle" && isFiniteLatLng(draft[0])) {
-    return <Marker position={draft[0]} icon={markerIcon} />;
+  if (
+    (tool === "circle" || (tool === "cm-area" && cmAreaDraw === "circle")) &&
+    isFiniteLatLng(draft[0])
+  ) {
+    const r = hover ? distanceM(draft[0], hover) : 0;
+    const outlined =
+      r > 1 ? (
+        <>
+          <SafeCircle
+            center={draft[0]}
+            radius={r}
+            pathOptions={{
+              color: tool === "cm-area" ? CM_HALO : "#38bdf8",
+              weight: tool === "cm-area" ? 7 : 2,
+              dashArray: "4 4",
+              fillOpacity: 0,
+            }}
+            interactive={false}
+          />
+          {tool === "cm-area" ? (
+            <SafeCircle
+              center={draft[0]}
+              radius={r}
+              pathOptions={{
+                color: CM_INK,
+                weight: 3,
+                dashArray: "4 4",
+                fillColor: CM_INK,
+                fillOpacity: 0.06,
+              }}
+              interactive={false}
+            />
+          ) : null}
+        </>
+      ) : null;
+    return (
+      <>
+        {outlined}
+        <Marker position={draft[0]} icon={markerIcon} />
+      </>
+    );
   }
   if (
     (tool === "point" || tool === "polygon") &&
@@ -597,6 +678,7 @@ export interface MapViewProps {
     identity: string;
     status: string;
   } | null;
+  cmAreaDraw: "circle" | "polygon" | null;
   fitRequest: FitRequest | null;
   onSelect: (id: string) => void;
   onDeselect: () => void;
@@ -636,6 +718,7 @@ export function MapView({
   hoverRef,
   headingDeg,
   linearTargetPreview,
+  cmAreaDraw,
   fitRequest,
   onEraseIds,
 }: MapViewProps) {
@@ -652,8 +735,8 @@ export function MapView({
       doubleClickZoom={tool === "select" && !editing}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="http://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <FitImported request={fitRequest} />
       <MapInteraction
@@ -661,6 +744,7 @@ export function MapView({
         draft={draft}
         headingDeg={headingDeg}
         linearTargetPreview={linearTargetPreview}
+        cmAreaDraw={cmAreaDraw}
         hoverRef={hoverRef}
         onMapClick={onMapClick}
         onFinish={onFinish}
@@ -723,6 +807,7 @@ function MapInteraction({
   draft,
   headingDeg,
   linearTargetPreview,
+  cmAreaDraw,
   hoverRef,
   onMapClick,
   onFinish,
@@ -742,6 +827,7 @@ function MapInteraction({
     identity: string;
     status: string;
   } | null;
+  cmAreaDraw: "circle" | "polygon" | null;
   hoverRef: MutableRefObject<LatLng | null>;
   onMapClick: (ll: LatLng) => void;
   onFinish: () => void;
@@ -808,6 +894,7 @@ function MapInteraction({
         hover={hover}
         headingDeg={headingDeg}
         linearTargetPreview={linearTargetPreview}
+        cmAreaDraw={cmAreaDraw}
       />
     </>
   );

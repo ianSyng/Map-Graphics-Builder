@@ -196,9 +196,10 @@ function makeGraphic(
   radiusM?: number,
 ): Graphic | null {
   const symbol = parseSymbol(props);
+  const cmDef = findControlMeasure(symbol?.entity ?? "");
   const cmLine =
-    isLinearTarget(symbol?.entity) ||
-    findControlMeasure(symbol?.entity ?? "")?.geometry === "line";
+    isLinearTarget(symbol?.entity) || cmDef?.geometry === "line";
+  const cmArea = cmDef?.geometry === "area";
   if (kind === "line" && positions.length < (cmLine ? 1 : minVertices("line"))) {
     return null;
   }
@@ -216,7 +217,7 @@ function makeGraphic(
     id: newId(),
     name: style.name || fallbackName,
     kind,
-    color: cmLine ? CM_INK : style.color,
+    color: cmLine || cmArea ? CM_INK : style.color,
     fillOpacity: style.fillOpacity,
     weight: style.weight,
     dash: style.dash,
@@ -281,11 +282,14 @@ function geometryToGraphics(
     const kindHint = parseKind(props.kind);
     const radiusM = parseRadiusM(props);
     const imported = parseSymbol(props);
+    const importedDef = findControlMeasure(imported?.entity ?? "");
     const kind: GraphicKind =
       isLinearTarget(imported?.entity) ||
         kindHint === "line" ||
-        findControlMeasure(imported?.entity ?? "")?.geometry === "line"
+        importedDef?.geometry === "line"
         ? "line"
+        : importedDef?.geometry === "area" && importedDef.areaDraw === "circle"
+          ? "circle"
         : kindHint === "circle" ||
             (kindHint !== "point" && asNumber(props.radiusM) != null)
           ? "circle"

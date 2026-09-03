@@ -8,6 +8,7 @@ import {
   type IdentityCode,
   type StatusCode,
 } from "@/domain/sidc";
+import { isCircularTarget } from "@/lib/cmArea";
 import {
   DEFAULT_LINEAR_TARGET_LENGTH_M,
   FIRE_SYSTEMS,
@@ -282,6 +283,38 @@ export function SidePanel({
                     </select>
                   </label>
                 </>
+              ) : isCircularTarget(selected.symbol.entity) ? (
+                <>
+                  <label className="flex flex-col gap-1 text-xs text-slate-400">
+                    Target number (AP)
+                    <input
+                      value={selected.symbol.targetNumber ?? ""}
+                      onChange={(e) =>
+                        onUpdate(selected.id, {
+                          name: e.target.value || selected.name,
+                          symbol: withSymbolFields(selected.symbol!, {
+                            targetNumber: e.target.value,
+                          }),
+                        })
+                      }
+                      className="rounded border border-slate-700 bg-slate-900 px-2 py-1.5 font-mono text-sm text-slate-100 outline-none focus:border-sky-500"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1 text-xs text-slate-400">
+                    Unique designation (T)
+                    <input
+                      value={selected.symbol.uniqueDesignation ?? ""}
+                      onChange={(e) =>
+                        onUpdate(selected.id, {
+                          symbol: withSymbolFields(selected.symbol!, {
+                            uniqueDesignation: e.target.value,
+                          }),
+                        })
+                      }
+                      className="rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-100 outline-none focus:border-sky-500"
+                    />
+                  </label>
+                </>
               ) : (
                 <label className="flex flex-col gap-1 text-xs text-slate-400">
                   Unique designation (T)
@@ -370,7 +403,7 @@ export function SidePanel({
             onHeading={onHeading}
             onRectSize={onRectSize}
           />
-          {!selected.symbol && selected.kind === "circle" && (
+          {selected.kind === "circle" && (
             <label className="flex flex-col gap-1 text-xs text-slate-400">
               Radius (m)
               <input

@@ -3,13 +3,15 @@
  *
  * Entity codes are the 6-digit Set B entity/type/subtype used by milsymbol.
  * `introducedIn` lets 2525E-only rows appear when that standard is selected.
- * Geometry is point (one anchor) for this catalog; lines/areas come later.
+ * Geometry is point (one anchor), line, or area (circle / polygon).
  */
 
 import type { SymbologyStandard } from "@/domain/sidc";
+import { CONTROL_MEASURE_AREAS } from "./controlMeasureAreas";
 import { CONTROL_MEASURE_LINES } from "./controlMeasureLines";
 
-export type ControlMeasureGeometry = "point" | "line";
+export type ControlMeasureGeometry = "point" | "line" | "area";
+export type ControlMeasureAreaDraw = "circle" | "polygon";
 
 /**
  * How the line is drawn on the map (points ignore this).
@@ -39,6 +41,8 @@ export interface ControlMeasureDef {
   geometry: ControlMeasureGeometry;
   introducedIn: SymbologyStandard;
   lineDraw?: ControlMeasureLineDraw;
+  /** Circular (center + radius) or multi-point polygon. Areas only. */
+  areaDraw?: ControlMeasureAreaDraw;
   /** Kept in the catalog data; omitted from the picker unless searched. */
   catalogHidden?: boolean;
 }
@@ -159,7 +163,11 @@ export function catalogForStandard(
   geometry: ControlMeasureGeometry = "point",
 ): ControlMeasureDef[] {
   const src =
-    geometry === "line" ? CONTROL_MEASURE_LINES : CONTROL_MEASURE_POINTS;
+    geometry === "line"
+      ? CONTROL_MEASURE_LINES
+      : geometry === "area"
+        ? CONTROL_MEASURE_AREAS
+        : CONTROL_MEASURE_POINTS;
   if (standard === "2525E") return src;
   return src.filter((d) => d.introducedIn === "2525D");
 }
@@ -167,6 +175,7 @@ export function catalogForStandard(
 export function findControlMeasure(entity: string): ControlMeasureDef | undefined {
   return (
     CONTROL_MEASURE_POINTS.find((d) => d.entity === entity) ??
-    CONTROL_MEASURE_LINES.find((d) => d.entity === entity)
+    CONTROL_MEASURE_LINES.find((d) => d.entity === entity) ??
+    CONTROL_MEASURE_AREAS.find((d) => d.entity === entity)
   );
 }

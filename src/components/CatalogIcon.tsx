@@ -106,6 +106,62 @@ export function LineCatalogIcon({
   );
 }
 
+export function AreaCatalogIcon({
+  abbrev,
+  color,
+  draw,
+}: {
+  abbrev: string;
+  color: string;
+  draw?: string;
+}) {
+  const circle = draw === "circle";
+  const label = abbrev.slice(0, 6);
+  const shape = () =>
+    circle ? (
+      <circle cx="24" cy="14" r="8" />
+    ) : (
+      <polygon points="8,20 16,6 32,6 40,20 24,22" />
+    );
+  return (
+    <span className="inline-flex h-8 w-12 shrink-0 items-center justify-center">
+      <svg viewBox="0 0 48 24" className="h-6 w-12" aria-hidden>
+        <g
+          fill="none"
+          stroke={CM_HALO}
+          strokeWidth={3.5}
+          strokeLinejoin="round"
+        >
+          {shape()}
+        </g>
+        <g
+          fill="none"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinejoin="round"
+        >
+          {shape()}
+        </g>
+        {label ? (
+          <text
+            x="24"
+            y="11"
+            textAnchor="middle"
+            fill={color}
+            stroke={CM_HALO}
+            strokeWidth={3}
+            paintOrder="stroke fill"
+            fontSize="7"
+            fontFamily="Segoe UI, sans-serif"
+          >
+            {label}
+          </text>
+        ) : null}
+      </svg>
+    </span>
+  );
+}
+
 /** Thumbnail after mount so milsymbol cannot blank the catalog. */
 export function CatalogIcon({ sidc }: { sidc: string }) {
   const [src, setSrc] = useState("");

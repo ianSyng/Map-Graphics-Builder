@@ -9,6 +9,7 @@ const DRAW_TOOLS: DrawTool[] = [
   "circle",
   "cm-point",
   "cm-line",
+  "cm-area",
 ];
 
 const HINTS: Record<DrawTool, string> = {
@@ -26,6 +27,8 @@ const HINTS: Record<DrawTool, string> = {
     "Pick a control-measure point, then click the map. Stays in this tool so you can place several.",
   "cm-line":
     "Pick a 2525 line. Linear target: click the center. Other lines: click vertices, then Enter or double-click to finish.",
+  "cm-area":
+    "Pick a 2525 area. Circular: click center, then the radius. Multi-point: click vertices, then Enter or double-click.",
 };
 
 function ToolButton({
@@ -89,6 +92,7 @@ export function ToolRail({
       </div>
       {(tool === "line" ||
         tool === "cm-line" ||
+        tool === "cm-area" ||
         tool === "polygon" ||
         tool === "rectangle") && (
         <div className="flex gap-1 px-2">

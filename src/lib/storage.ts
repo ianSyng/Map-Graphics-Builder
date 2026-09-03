@@ -1,4 +1,5 @@
 import type { Graphic } from "@/types/graphic";
+import { isCmAreaGraphic } from "./cmArea";
 import { CM_INK, isCmLineGraphic } from "./cmLine";
 import { cleanLatLngs } from "./latlng";
 import { normalizeLinearTarget } from "./linearTarget";
@@ -17,7 +18,8 @@ export function loadGraphics(): Graphic[] {
       const cleaned: Graphic = {
         ...g,
         positions: cleanLatLngs(g.positions),
-        color: isCmLineGraphic(g) ? CM_INK : g.color,
+        color:
+          isCmLineGraphic(g) || isCmAreaGraphic(g) ? CM_INK : g.color,
       };
       return [normalizeLinearTarget(cleaned)];
     });

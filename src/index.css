@@ -168,6 +168,13 @@ body {
   justify-content: flex-end;
 }
 
+.cm-area-label {
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.15;
+  text-align: center;
+}
+
 .cm-line-echelon {
   position: relative;
   background: transparent;

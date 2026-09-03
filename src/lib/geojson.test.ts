@@ -196,6 +196,56 @@ test("2525 line LineString keeps vertices (not collapsed to a point)", () => {
   assert.equal(round.graphics[0]?.positions.length, 3);
 });
 
+test("2525 circular area Point keeps radius", () => {
+  const result = importGraphicsFromUnknown({
+    type: "Feature",
+    properties: {
+      name: "NFA",
+      kind: "circle",
+      sidc: "10032500002403030000",
+      radiusM: 1200,
+    },
+    geometry: { type: "Point", coordinates: [-98, 39] },
+  });
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const g = result.graphics[0];
+  assert.equal(g?.kind, "circle");
+  assert.equal(g?.symbol?.entity, "240303");
+  assert.equal(g?.radiusM, 1200);
+  assert.equal(g?.color, "#e2e8f0");
+});
+
+test("2525 area Polygon keeps vertices", () => {
+  const result = importGraphicsFromUnknown({
+    type: "Feature",
+    properties: {
+      name: "AO",
+      kind: "polygon",
+      sidc: "10032500001201000000",
+    },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-98, 39],
+          [-97.5, 39],
+          [-97.5, 39.4],
+          [-98, 39.4],
+          [-98, 39],
+        ],
+      ],
+    },
+  });
+  assert.equal(result.ok, true);
+  if (!result.ok) return;
+  const g = result.graphics[0];
+  assert.equal(g?.kind, "polygon");
+  assert.equal(g?.symbol?.entity, "120100");
+  assert.equal(g?.positions.length, 4);
+  assert.equal(g?.color, "#e2e8f0");
+});
+
 test("linear target Point stays a single center", () => {
   const result = importGraphicsFromUnknown({
     type: "Feature",

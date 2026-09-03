@@ -37,6 +37,7 @@ export type AddGraphicExtra = {
   color?: string;
   dash?: Graphic["dash"];
   weight?: number;
+  fillOpacity?: number;
 };
 
 function defaultName(kind: GraphicKind, n: number): string {
@@ -76,6 +77,7 @@ export function useGraphicsStore() {
         color: extra?.color ?? DEFAULT_STYLE.color,
         dash: extra?.dash ?? DEFAULT_STYLE.dash,
         weight: extra?.weight ?? DEFAULT_STYLE.weight,
+        fillOpacity: extra?.fillOpacity ?? DEFAULT_STYLE.fillOpacity,
         positions,
         radiusM: extra?.radiusM,
         lengthM: extra?.lengthM,
